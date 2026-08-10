@@ -14,7 +14,7 @@ app.use(express.json());
 app.use(cors({ origin: process.env.CLIENT_URL || '*' }));
 
 const PORT = Number(process.env.PORT) || 5000;
-const HOST = process.env.HOST || '127.0.0.1';
+const HOST = process.env.HOST || '0.0.0.0';
 const authFallbackRoutes = ['/api/users/register', '/api/users/login'];
 
 const canUseAuthFallback = (req) =>
