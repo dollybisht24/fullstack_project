@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
+    "check:db": "node src/checkDbConnection.js",
     "seed": "node src/seeder.js"
   },
   "dependencies": {

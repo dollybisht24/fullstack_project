@@ -6,7 +6,7 @@ const path = require('path');
 const mongoose = require('mongoose');
 const User = require('./models/User');
 
-dotenv.config();
+dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
 const app = express();
 

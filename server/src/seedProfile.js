@@ -3,7 +3,9 @@ const dotenv = require('dotenv');
 const OwnerProfile = require('./models/OwnerProfile');
 const connectDB = require('./config/db');
 
-dotenv.config();
+const path = require('path');
+
+dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
 // Connect to MongoDB
 connectDB(process.env.MONGODB_URI || 'mongodb://localhost:27017/nykaa-clone');

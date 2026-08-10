@@ -4,7 +4,9 @@ const User = require('./models/User');
 const Product = require('./models/Product');
 const connectDB = require('./config/db');
 
-dotenv.config();
+const path = require('path');
+
+dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
 const users = [
   {
@@ -452,7 +454,9 @@ const products = [
 
 const importData = async () => {
   try {
-    await connectDB(process.env.MONGODB_URI || 'mongodb://localhost:27017/nykaa-clone');
+    await connectDB(process.env.MONGODB_URI || 'mongodb://localhost:27017/nykaa-clone', {
+      throwOnError: true,
+    });
     await User.deleteMany();
     await Product.deleteMany();
     const createdUsers = await User.insertMany(users);
@@ -469,7 +473,9 @@ const importData = async () => {
 
 const destroyData = async () => {
   try {
-    await connectDB(process.env.MONGODB_URI || 'mongodb://localhost:27017/nykaa-clone');
+    await connectDB(process.env.MONGODB_URI || 'mongodb://localhost:27017/nykaa-clone', {
+      throwOnError: true,
+    });
     await User.deleteMany();
     await Product.deleteMany();
     console.log('🗑️  Data Destroyed!');
