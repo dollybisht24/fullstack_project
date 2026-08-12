@@ -382,7 +382,7 @@ export default function Home() {
         <section className="mb-12">
           <h2 className="text-2xl font-bold mb-6">Shop by Category</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
-            {categories.slice(0, 5).map((cat) => (
+            {Array.isArray(categories) && categories.slice(0, 5).map((cat) => (
               <Link
                 key={cat}
                 to={`/products?category=${cat}`}
@@ -459,7 +459,7 @@ export default function Home() {
           </div>
           {status === 'loading' && products.length === 0 && <Spinner />}
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-            {products.slice(0, 10).map((p) => (
+            {Array.isArray(products) && products.slice(0, 10).map((p) => (
               <ProductCard key={p._id} p={p} />
             ))}
           </div>
@@ -519,7 +519,7 @@ export default function Home() {
             <p className="text-pink-100">Most loved by our customers</p>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
-            {products.filter(p => p.rating >= 4.5).slice(0, 5).map((p) => (
+            {Array.isArray(products) && products.filter(p => p.rating >= 4.5).slice(0, 5).map((p) => (
               <ProductCard key={p._id} p={p} />
             ))}
           </div>

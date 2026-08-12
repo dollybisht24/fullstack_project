@@ -41,12 +41,31 @@ export default function BrandSection() {
       )
       
       const data = await response.json()
-      const brandData = data.photos.map((photo, idx) => ({
+      const photos = data.photos || []
+      let brandData = photos.map((photo, idx) => ({
         id: photo.id,
         image: photo.src.medium,
         name: generateBrandName(tabId, idx),
         photographer: photo.photographer
       }))
+
+      // Fallback in case Pexels API fails (e.g. 401 Unauthorized or rate limited)
+      if (brandData.length === 0) {
+        const fallbacks = [
+          'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=500',
+          'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=500',
+          'https://images.unsplash.com/photo-1509967419530-da38b4704bc6?w=500',
+          'https://images.unsplash.com/photo-1512207736890-6ffed8a84e8d?w=500',
+          'https://images.unsplash.com/photo-1515688594390-b649af70d282?w=500',
+          'https://images.unsplash.com/photo-1526045431048-f857369aba09?w=500',
+        ]
+        brandData = Array.from({ length: 12 }).map((_, idx) => ({
+          id: `fallback-${tabId}-${idx}`,
+          image: fallbacks[idx % fallbacks.length],
+          name: generateBrandName(tabId, idx),
+          photographer: 'Unsplash'
+        }))
+      }
       
       setBrands(brandData)
       sessionStorage.setItem(cacheKey, JSON.stringify(brandData))

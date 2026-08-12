@@ -131,10 +131,11 @@ const productSlice = createSlice({
         state.status = 'loading'
       })
       .addCase(fetchProducts.fulfilled, (state, action) => {
-        state.items = action.payload.products || action.payload
-        state.page = action.payload.page || 1
-        state.pages = action.payload.pages || 1
-        state.total = action.payload.total || action.payload.length
+        const payloadProducts = action.payload?.products || action.payload
+        state.items = Array.isArray(payloadProducts) ? payloadProducts : []
+        state.page = action.payload?.page || 1
+        state.pages = action.payload?.pages || 1
+        state.total = action.payload?.total || state.items.length
         state.status = 'succeeded'
       })
       .addCase(fetchProducts.rejected, (state, action) => {
@@ -158,7 +159,7 @@ const productSlice = createSlice({
         // Don't block other loading
       })
       .addCase(fetchFeaturedProducts.fulfilled, (state, action) => {
-        state.featured = action.payload
+        state.featured = Array.isArray(action.payload) ? action.payload : []
       })
       .addCase(fetchFeaturedProducts.rejected, (state) => {
         state.featured = []
@@ -168,7 +169,7 @@ const productSlice = createSlice({
         // Don't block other loading
       })
       .addCase(fetchTopProducts.fulfilled, (state, action) => {
-        state.topRated = action.payload
+        state.topRated = Array.isArray(action.payload) ? action.payload : []
       })
       .addCase(fetchTopProducts.rejected, (state) => {
         state.topRated = []
@@ -178,7 +179,7 @@ const productSlice = createSlice({
         // Don't block other loading
       })
       .addCase(fetchRelatedProducts.fulfilled, (state, action) => {
-        state.related = action.payload
+        state.related = Array.isArray(action.payload) ? action.payload : []
       })
       .addCase(fetchRelatedProducts.rejected, (state) => {
         state.related = []
@@ -188,7 +189,7 @@ const productSlice = createSlice({
         // Don't block other loading
       })
       .addCase(fetchCategories.fulfilled, (state, action) => {
-        state.categories = action.payload
+        state.categories = Array.isArray(action.payload) ? action.payload : []
       })
       .addCase(fetchCategories.rejected, (state) => {
         state.categories = []
@@ -198,7 +199,7 @@ const productSlice = createSlice({
         // Don't block other loading
       })
       .addCase(fetchBrands.fulfilled, (state, action) => {
-        state.brands = action.payload
+        state.brands = Array.isArray(action.payload) ? action.payload : []
       })
       .addCase(fetchBrands.rejected, (state) => {
         state.brands = []
