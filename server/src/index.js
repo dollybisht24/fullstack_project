@@ -10,6 +10,9 @@ dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
 const app = express();
 
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
 const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:3000',
