@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useMakeupProducts, syncProductsFromAPI } from '../hooks/useMakeupProducts'
 import { addToCart } from '../store/slices/cartSlice'
 import { FaShoppingCart, FaTimes } from 'react-icons/fa'
-import axios from 'axios'
+import axios from '../utils/axios'
 
 export default function Home() {
   const dispatch = useDispatch()
@@ -45,7 +45,7 @@ export default function Home() {
     setShowCollectionModal(true)
     setLoadingCollection(true)
     try {
-      const { data } = await axios.get('http://localhost:5000/api/products?brand=Meenakshi Makeover')
+      const { data } = await axios.get('/products?brand=Meenakshi Makeover')
       setCollectionProducts(data.products || data)
     } catch (error) {
       console.error('Error fetching collection:', error)

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
+import axios from '../utils/axios'
 
 export default function SearchBar() {
   const [query, setQuery] = useState('')
@@ -30,10 +31,9 @@ export default function SearchBar() {
     if (query.length > 2) {
       debounceRef.current = setTimeout(async () => {
         try {
-          const response = await fetch(
-            `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/products?keyword=${query}&pageSize=5`
-          )
-          const data = await response.json()
+          const { data } = await axios.get('/products', {
+            params: { keyword: query, pageSize: 5 },
+          })
           setSuggestions(data.products || data)
           setShowSuggestions(true)
         } catch (error) {

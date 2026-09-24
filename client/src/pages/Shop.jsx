@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { addToCart } from '../store/slices/cartSlice'
 import { addToWishlist } from '../store/slices/wishlistSlice'
 import { useNavigate } from 'react-router-dom'
-import axios from 'axios'
+import axios from '../utils/axios'
 
 export default function Shop() {
   const [products, setProducts] = useState([])
@@ -31,7 +31,7 @@ export default function Shop() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const { data } = await axios.get('http://localhost:5000/api/products')
+        const { data } = await axios.get('/products')
         setProducts(data.products || data)
         setLoading(false)
       } catch (error) {

@@ -91,20 +91,22 @@ const registerUser = asyncHandler(async (req, res) => {
   });
 
   if (user) {
-    // Send verification email
-    if (process.env.EMAIL_USER) {
-      try {
-        await transporter.sendMail({
+    // Send verification email asynchronously if valid credentials exist
+    if (
+      process.env.EMAIL_USER &&
+      process.env.EMAIL_PASS &&
+      !process.env.EMAIL_USER.includes('your-email')
+    ) {
+      transporter
+        .sendMail({
           from: process.env.EMAIL_USER,
           to: user.email,
           subject: 'Verify Your Nykaa Clone Account',
           html: `<h2>Welcome to Nykaa Clone!</h2>
                  <p>Please verify your email by clicking the link below:</p>
                  <a href="${process.env.CLIENT_URL}/verify/${verificationToken}">Verify Email</a>`,
-        });
-      } catch (error) {
-        console.error('Email send error:', error);
-      }
+        })
+        .catch((error) => console.error('Email send error:', error));
     }
 
     res.status(201).json({

@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { FaInstagram, FaYoutube, FaFacebookF, FaPinterestP, FaStar, FaPhone, FaEnvelope, FaMapMarkerAlt, FaAward, FaCheckCircle, FaShoppingCart } from 'react-icons/fa'
 import { useDispatch, useSelector } from 'react-redux'
 import { addToCart } from '../store/slices/cartSlice'
-import axios from 'axios'
+import axios from '../utils/axios'
 
 export default function OwnerProfile() {
   const [showCertificates, setShowCertificates] = useState(false)
@@ -28,7 +28,7 @@ export default function OwnerProfile() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const { data } = await axios.get('http://localhost:5000/api/products?brand=Meenakshi Makeover')
+        const { data } = await axios.get('/products?brand=Meenakshi Makeover')
         setProducts(data.products || data)
         setLoadingProducts(false)
       } catch (error) {
@@ -81,7 +81,7 @@ export default function OwnerProfile() {
     setIsTyping(true)
 
     try {
-      const response = await axios.post('http://localhost:5000/api/chat/message', {
+      const response = await axios.post('/chat/message', {
         message: inputMessage
       })
       
