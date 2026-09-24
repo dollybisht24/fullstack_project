@@ -24,7 +24,7 @@ export default function ChatPage() {
 
   const initializeChat = async () => {
     try {
-      const { data } = await axios.get('/api/chat/session');
+      const { data } = await axios.get('/chat/session');
       setSessionId(data.sessionId);
       setMessages(data.messages || []);
     } catch (error) {
@@ -53,14 +53,14 @@ export default function ChatPage() {
     setIsTyping(true);
 
     try {
-      const { data } = await axios.post('/api/chat/message', {
+      const { data } = await axios.post('/chat/message', {
         sessionId,
         message: inputMessage
       });
 
       setMessages(prev => [...prev, {
         role: 'assistant',
-        content: data.response,
+        content: data.message || data.response || data.data?.content || '',
         timestamp: new Date()
       }]);
     } catch (error) {

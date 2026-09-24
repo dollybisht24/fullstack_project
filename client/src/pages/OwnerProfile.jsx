@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { FaInstagram, FaYoutube, FaFacebookF, FaPinterestP, FaStar, FaPhone, FaEnvelope, FaMapMarkerAlt, FaAward, FaCheckCircle, FaShoppingCart } from 'react-icons/fa'
 import { useDispatch, useSelector } from 'react-redux'
@@ -11,12 +11,21 @@ export default function OwnerProfile() {
   const [messages, setMessages] = useState([])
   const [inputMessage, setInputMessage] = useState('')
   const [isTyping, setIsTyping] = useState(false)
+  const [chatSessionId, setChatSessionId] = useState(null)
+  const chatEndRef = useRef(null)
   const [products, setProducts] = useState([])
   const [loadingProducts, setLoadingProducts] = useState(true)
   const [notification, setNotification] = useState(null)
   
   const dispatch = useDispatch()
   const { user } = useSelector((state) => state.auth)
+
+  // Auto-scroll chat to latest message
+  useEffect(() => {
+    if (showChat) {
+      chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    }
+  }, [messages, isTyping, showChat])
 
   // Show notification
   const showNotification = (message, type = 'success') => {
@@ -72,31 +81,52 @@ export default function OwnerProfile() {
     'Versatility: From natural day looks to glamorous evening artistry'
   ]
 
-  const handleSendMessage = async () => {
-    if (!inputMessage.trim()) return
+  const quickPrompts = [
+    { label: '🧴 Oily Skin Routine', prompt: 'I have oily skin and large pores. What skincare routine and makeup do you recommend?' },
+    { label: '💧 Dry Skin Hydration', prompt: 'My skin is dry and flaky. What moisturizer and dewy foundation works best?' },
+    { label: '👁️ Erase Dark Circles', prompt: 'How do I conceal dark circles without creasing?' },
+    { label: '🎨 Undertone & Foundation', prompt: 'How do I find my exact skin undertone and foundation shade?' },
+    { label: '✨ Body Skin & Glow', prompt: 'How do I treat strawberry legs, body acne, and get a red-carpet body glow?' },
+    { label: '👰 Bridal & Party Glam', prompt: 'What are your bridal makeup packages and tips for long-lasting makeup?' },
+    { label: '🌿 Sensitive Skin Care', prompt: 'I have sensitive skin prone to redness. What skincare and makeup is safe for me?' }
+  ]
 
-    const userMessage = { role: 'user', content: inputMessage }
-    setMessages([...messages, userMessage])
+  const handleSendMessage = async (customText) => {
+    const textToSend = typeof customText === 'string' ? customText : inputMessage
+    if (!textToSend.trim()) return
+
+    const userMessage = { role: 'user', content: textToSend }
+    setMessages((prev) => [...prev, userMessage])
     setInputMessage('')
     setIsTyping(true)
 
     try {
       const response = await axios.post('/chat/message', {
-        message: inputMessage
+        sessionId: chatSessionId,
+        message: textToSend
       })
       
-      const botMessage = { role: 'assistant', content: response.data.message }
+      if (response.data.sessionId) {
+        setChatSessionId(response.data.sessionId)
+      }
+
+      const replyContent = response.data.message || response.data.response || response.data.data?.content || ''
+      const botMessage = { role: 'assistant', content: replyContent }
       setMessages(prev => [...prev, botMessage])
     } catch (error) {
       console.error('Chat error:', error)
       const errorMessage = { 
         role: 'assistant', 
-        content: 'Hi! I\'m Meenakshi, your beauty assistant. I can help you with makeup tips, product recommendations, and booking consultations. What would you like to know?' 
+        content: 'Hi gorgeous! 💄 I\'m Meenakshi! How can I help you today? Ask me about your skin type, finding your foundation shade, fixing dark circles, body care, or bridal glam! 💕' 
       }
       setMessages(prev => [...prev, errorMessage])
     } finally {
       setIsTyping(false)
     }
+  }
+
+  const handleClearChat = () => {
+    setMessages([])
   }
 
   return (
@@ -558,38 +588,88 @@ export default function OwnerProfile() {
       <AnimatePresence>
         {showChat && (
           <motion.div
-            initial={{ opacity: 0, y: 20, scale: 0.95 }}
+            initial={{ opacity: 0, y: 30, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            className="fixed bottom-24 right-6 w-96 h-[550px] bg-white rounded-3xl shadow-2xl z-50 flex flex-col border-2 border-pink-200 overflow-hidden"
+            exit={{ opacity: 0, y: 30, scale: 0.95 }}
+            className="fixed inset-x-2 bottom-2 sm:inset-auto sm:bottom-24 sm:right-6 w-auto sm:w-[420px] h-[85vh] sm:h-[620px] max-h-[90vh] bg-white rounded-3xl shadow-2xl z-50 flex flex-col border-2 border-pink-200 overflow-hidden"
           >
             {/* Chat Header */}
-            <div className="bg-gradient-to-r from-pink-500 to-rose-500 text-white p-5 flex items-center justify-between">
+            <div className="bg-gradient-to-r from-pink-500 via-rose-500 to-purple-600 text-white p-4 flex items-center justify-between shadow-md">
               <div className="flex items-center gap-3">
-                <img 
-                  src="https://thumbs.dreamstime.com/z/female-avatar-icon-women-clipart-png-vector-girl-avatar-women-clipart-bor-bisiness-icon-png-vector-233362315.jpg?ct=jpeg" 
-                  alt="AI" 
-                  className="w-12 h-12 rounded-full border-2 border-white"
-                />
+                <div className="relative">
+                  <img 
+                    src="https://thumbs.dreamstime.com/z/female-avatar-icon-women-clipart-png-vector-girl-avatar-women-clipart-bor-bisiness-icon-png-vector-233362315.jpg?ct=jpeg" 
+                    alt="AI" 
+                    className="w-11 h-11 rounded-full border-2 border-white object-cover"
+                  />
+                  <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-400 border-2 border-white rounded-full"></span>
+                </div>
                 <div>
-                  <h3 className="text-lg">Meenakshi AI</h3>
-                  <p className="text-xs text-pink-100">Your Beauty Assistant</p>
+                  <h3 className="text-base font-bold flex items-center gap-1.5">
+                    Meenakshi AI
+                    <span className="text-[10px] bg-white/20 px-2 py-0.5 rounded-full uppercase tracking-wider font-semibold">Expert</span>
+                  </h3>
+                  <p className="text-xs text-pink-100 flex items-center gap-1">
+                    <span>💄</span> Master Makeup Artist & Skincare Guide
+                  </p>
                 </div>
               </div>
-              <button
-                onClick={() => setShowChat(false)}
-                className="text-white hover:text-pink-200 transition-colors text-2xl"
-              >
-                ×
-              </button>
+              <div className="flex items-center gap-1">
+                {messages.length > 0 && (
+                  <button
+                    onClick={handleClearChat}
+                    title="Clear Chat"
+                    className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/25 flex items-center justify-center transition text-sm"
+                  >
+                    🗑️
+                  </button>
+                )}
+                <button
+                  onClick={() => setShowChat(false)}
+                  className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/25 flex items-center justify-center text-white transition text-lg font-bold"
+                >
+                  ×
+                </button>
+              </div>
+            </div>
+
+            {/* Quick Suggestion Chips Header */}
+            <div className="bg-pink-50/70 border-b border-pink-100 px-3 py-2 overflow-x-auto flex gap-2 whitespace-nowrap">
+              {quickPrompts.map((item, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => handleSendMessage(item.prompt)}
+                  disabled={isTyping}
+                  className="text-xs bg-white text-pink-700 hover:bg-pink-600 hover:text-white border border-pink-200 rounded-full px-3 py-1 transition-all shadow-sm font-medium disabled:opacity-50"
+                >
+                  {item.label}
+                </button>
+              ))}
             </div>
 
             {/* Chat Messages */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gradient-to-br from-pink-50 to-purple-50">
+            <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gradient-to-b from-pink-50/40 via-white to-purple-50/30">
               {messages.length === 0 && (
-                <div className="text-center text-gray-500 mt-20">
-                  <p className="text-gray-700 text-lg">Hi! I'm Meenakshi AI</p>
-                  <p className="text-sm mt-2">Ask me about makeup tips, products, or bookings!</p>
+                <div className="text-center my-auto py-6 px-3">
+                  <div className="w-14 h-14 mx-auto mb-3 rounded-full bg-pink-100 flex items-center justify-center text-2xl shadow-inner">
+                    💄
+                  </div>
+                  <h4 className="text-base font-bold text-gray-800">Hi! I'm Meenakshi AI</h4>
+                  <p className="text-xs text-gray-500 max-w-xs mx-auto mt-1 mb-4">
+                    Ask me anything about face & body skin types, foundation matching, dark circles, acne, or bridal looks!
+                  </p>
+                  <div className="grid grid-cols-1 gap-2 text-left max-w-xs mx-auto">
+                    {quickPrompts.slice(0, 4).map((item, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => handleSendMessage(item.prompt)}
+                        className="text-xs bg-white hover:bg-pink-50 text-gray-700 p-2.5 rounded-xl border border-pink-100 transition shadow-sm text-left flex items-center justify-between group"
+                      >
+                        <span>{item.label}</span>
+                        <span className="text-pink-400 group-hover:translate-x-1 transition-transform">→</span>
+                      </button>
+                    ))}
+                  </div>
                 </div>
               )}
               {messages.map((msg, idx) => (
@@ -598,43 +678,47 @@ export default function OwnerProfile() {
                   className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
                   <div
-                    className={`max-w-[80%] p-4 rounded-2xl shadow-md ${
+                    className={`max-w-[85%] sm:max-w-[80%] p-3.5 rounded-2xl shadow-sm text-sm leading-relaxed ${
                       msg.role === 'user'
                         ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-br-none'
-                        : 'bg-white text-gray-800 rounded-bl-none border border-pink-200'
+                        : 'bg-white text-gray-800 rounded-bl-none border border-pink-100 shadow'
                     }`}
                   >
-                    {msg.content}
+                    <div className="whitespace-pre-wrap font-normal">
+                      {msg.content}
+                    </div>
                   </div>
                 </div>
               ))}
               {isTyping && (
                 <div className="flex justify-start">
-                  <div className="bg-white text-gray-800 p-4 rounded-2xl rounded-bl-none shadow-md border border-pink-200">
-                    <div className="flex gap-2">
-                      <span className="w-2 h-2 bg-pink-400 rounded-full animate-bounce"></span>
-                      <span className="w-2 h-2 bg-pink-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></span>
-                      <span className="w-2 h-2 bg-pink-400 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></span>
-                    </div>
+                  <div className="bg-white text-gray-800 p-3 rounded-2xl rounded-bl-none shadow-sm border border-pink-100 flex items-center gap-2">
+                    <span className="text-xs text-pink-500 font-medium">Meenakshi is typing</span>
+                    <span className="w-1.5 h-1.5 bg-pink-500 rounded-full animate-bounce"></span>
+                    <span className="w-1.5 h-1.5 bg-pink-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></span>
+                    <span className="w-1.5 h-1.5 bg-pink-500 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></span>
                   </div>
                 </div>
               )}
+              <div ref={chatEndRef} />
             </div>
 
             {/* Chat Input */}
-            <div className="p-4 bg-white border-t-2 border-pink-100">
+            <div className="p-3 bg-white border-t border-pink-100">
               <div className="flex gap-2">
                 <input
                   type="text"
                   value={inputMessage}
                   onChange={(e) => setInputMessage(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                  placeholder="Type your message..."
-                  className="flex-1 px-4 py-3 border-2 border-pink-200 rounded-full focus:outline-none focus:ring-2 focus:ring-pink-400 focus:border-transparent"
+                  placeholder="Ask about skin, makeup, undertones..."
+                  className="flex-1 px-4 py-2.5 text-sm border-2 border-pink-200 rounded-full focus:outline-none focus:ring-2 focus:ring-pink-400 focus:border-transparent transition"
+                  disabled={isTyping}
                 />
                 <button
-                  onClick={handleSendMessage}
-                  className="bg-gradient-to-r from-pink-500 to-rose-500 text-white px-6 py-3 rounded-full hover:shadow-lg transition-all hover:scale-105"
+                  onClick={() => handleSendMessage()}
+                  disabled={!inputMessage.trim() || isTyping}
+                  className="bg-gradient-to-r from-pink-500 to-rose-500 text-white px-5 py-2.5 text-sm font-semibold rounded-full hover:shadow-lg transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Send
                 </button>

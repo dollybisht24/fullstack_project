@@ -1,5 +1,5 @@
 import React from 'react'
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, useLocation } from 'react-router-dom'
 import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import Home from './pages/Home'
@@ -18,8 +18,10 @@ import ChatPage from './pages/ChatPage'
 import Shop from './pages/Shop'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
+import AiChatAssistant from './components/AiChatAssistant'
 
 export default function App() {
+  const location = useLocation()
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Navbar />
@@ -42,6 +44,7 @@ export default function App() {
         </Routes>
       </main>
       <Footer />
+      {location.pathname !== '/owner-profile' && <AiChatAssistant />}
       <ToastContainer position="top-right" autoClose={3000} />
     </div>
   )
